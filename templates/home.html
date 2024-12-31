@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block content %}
+<table border="1" width="80%", height="400", align="center", style="text-align: center; font-size: large;">
+  <tr>
+    <th>回目</th>
+    <th>父</th>
+    <th>母</th>
+    <th>康太</th>
+    <th>愛実</th>
+  </tr>
+<tbody id="tensu_id">
+  {% for tensu in tensu_list %}
+<tr>
+	<form method="post" action="/" id="updel">
+	<td>{{tensu.id}}</td><td contenteditable="true">{{ tensu.tensu_1 }}</td><td contenteditable="true">{{ tensu.tensu_2 }}</td>
+    <td contenteditable="true">{{ tensu.tensu_3 }}</td><td contenteditable="true">{{ tensu.tensu_4 }}</td>
+</form>
+ <!-- <td>
+	<input type="submit" value="更新" name="command" form="updel">
+</td>
+<td>
+	<input type="submit" value="削除" name="command" onclick="return confirm('削除してよろしいですか？')" form="updel">
+</td> -->
+</tr>
+{% endfor %}
+</tbody>
+	<tr>
+		<form method="post" action="/" id="add">
+		<td></td>
+			<td><input type="number" name="tensu_1"/></td>
+			<td><input type="number" name="tensu_2"/></td>
+			<td><input type="number" name="tensu_3"/></td>
+			<td><input type="number" name="tensu_4"/></td>
+		</form>
+		<td>
+			<input type="submit" value="追加" name="command" form="add">
+	</td></tr>
+	<tr><td colspan="10" style="font-weight: bold;">賞金</td></tr>
+	<tr><td></td><td>{{ shokin[0] }}</td><td>{{ shokin[1] }}</td><td>{{ shokin[2] }}</td><td>{{ shokin[3] }}</td></tr>
+</table>
+<h1 align="center">飛び賞：飛んだ人は飛ばした人に５００円</h1>
+<script>
+	/* const tensu_id = document.getElementById("tensu_id");
+	for (let i = 0; i < tensu_list.length; i++) { // 配列の中のオブジェクトの数だけ処理を繰り返す
+	const tr = document.createElement("tr");
+	tensu_id.appendChild(tr); // 表の中に８個の「tr」（行）ができる
+	// 1行の中を生成
+	const objArray = Object.values(players[i]); // オブジェクトに含まれるプロパティの値の一覧を配列として取得
+	for (let arr = 0; arr < objArray.length; arr++) { 
+		const td = document.createElement("td");
+		td.innerHTML = objArray[arr]; // arrはvalueの部分
+		if (arr != 4) {
+			td.contentEditable = true	
+		}
+		tr.appendChild(td);
+	}
+	} */
+</script>
+{% endblock %}
