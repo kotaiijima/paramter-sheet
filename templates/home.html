@@ -1,59 +1,124 @@
-{% extends "layout.html" %}
+<!doctype html>
+<html>
+<head>
+<title> parameter sheet 生成ツール </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .frame1-group {
+            margin-left: 20px;
+        }
+        .submit-group {
+            margin-top: 10px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
 {% block content %}
-<table border="1" width="80%", height="400", align="center", style="text-align: center; font-size: large;">
-  <tr>
-    <th>回目</th>
-    <th>父</th>
-    <th>母</th>
-    <th>康太</th>
-    <th>愛実</th>
-  </tr>
-<tbody id="tensu_id">
-  {% for tensu in tensu_list %}
-<tr>
-	<form method="post" action="/" id="updel">
-	<td>{{tensu.id}}</td><td contenteditable="true">{{ tensu.tensu_1 }}</td><td contenteditable="true">{{ tensu.tensu_2 }}</td>
-    <td contenteditable="true">{{ tensu.tensu_3 }}</td><td contenteditable="true">{{ tensu.tensu_4 }}</td>
-</form>
- <!-- <td>
-	<input type="submit" value="更新" name="command" form="updel">
-</td>
-<td>
-	<input type="submit" value="削除" name="command" onclick="return confirm('削除してよろしいですか？')" form="updel">
-</td> -->
-</tr>
-{% endfor %}
-</tbody>
-	<tr>
-		<form method="post" action="/" id="add">
-		<td></td>
-			<td><input type="number" name="tensu_1"/></td>
-			<td><input type="number" name="tensu_2"/></td>
-			<td><input type="number" name="tensu_3"/></td>
-			<td><input type="number" name="tensu_4"/></td>
-		</form>
-		<td>
-			<input type="submit" value="追加" name="command" form="add">
-	</td></tr>
-	<tr><td colspan="10" style="font-weight: bold;">賞金</td></tr>
-	<tr><td></td><td>{{ shokin[0] }}</td><td>{{ shokin[1] }}</td><td>{{ shokin[2] }}</td><td>{{ shokin[3] }}</td></tr>
-</table>
-<h1 align="center">飛び賞：飛んだ人は飛ばした人に５００円</h1>
-<script>
-	/* const tensu_id = document.getElementById("tensu_id");
-	for (let i = 0; i < tensu_list.length; i++) { // 配列の中のオブジェクトの数だけ処理を繰り返す
-	const tr = document.createElement("tr");
-	tensu_id.appendChild(tr); // 表の中に８個の「tr」（行）ができる
-	// 1行の中を生成
-	const objArray = Object.values(players[i]); // オブジェクトに含まれるプロパティの値の一覧を配列として取得
-	for (let arr = 0; arr < objArray.length; arr++) { 
-		const td = document.createElement("td");
-		td.innerHTML = objArray[arr]; // arrはvalueの部分
-		if (arr != 4) {
-			td.contentEditable = true	
-		}
-		tr.appendChild(td);
-	}
-	} */
-</script>
+<!-- ここにメインコンテンツを書く -->
+    <h2>パラメーターシート作成</h2>
+    <label for="frame1">枠１:</label>
+    <input type="text" name="frame1" placeholder="サーバー情報">
+    <div class="frame1-group">
+        <div class="form-group">
+            <label for="item1">項目:</label>
+            <input type="text" id="item1" name="item1">
+        </div>
+        <div class="form-group">
+            <label for="item2">項目:</label>
+                <input type="text" id="item2" name="item2">
+            </div>
+            <div class="form-group">
+                <label for="item3">項目:</label>
+                <input type="text" id="item3" name="item3">
+            </div>
+            <div class="form-group">
+                <label for="item4">項目:</label>
+                <input type="text" id="item4" name="item4">
+            </div>
+            <div class="form-group">
+                <label for="item5">項目:</label>
+                <input type="text" id="item5" name="item5">
+            </div>
+            <div id="container"></div>
+            <button onclick="addItem()">項目を追加</button>
+            <button onclick="addFrame()">枠を追加</button>
+        </div>
+        <form method="POST">
+        <div class="submit-group">
+        <button type="submit" name="submit_button" value="clicked">作成</button>
+    </div>
+    </form>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
 {% endblock %}
+</body>
+</html>
+
+
+<script>
+    function addItem() {
+        const container = document.getElementById("container");
+
+        const group = document.createElement("div");
+        group.className = "form-group";
+
+        const label = document.createElement("label");
+        label.textContent = "項目:";
+        label.htmlFor = "dynamicInput";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "dynamicInput";
+        input.name = "dynamicInput";
+
+        group.appendChild(label);
+        group.appendChild(input);
+        container.appendChild(group);
+    }
+
+    function addFrame() {
+        const container = document.getElementById("container");
+
+        const group = document.createElement("div");
+        group.className = "form-group";
+
+        const label = document.createElement("label");
+        label.textContent = "枠:";
+        label.htmlFor = "dynamicInput";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "dynamicInput";
+        input.name = "dynamicInput";
+
+        group.appendChild(label);
+        group.appendChild(input);
+        container.appendChild(group);
+    }
+</script>
