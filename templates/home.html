@@ -9,21 +9,24 @@
         }
         .form-group {
             margin-bottom: 10px;
+            display: flex;
         }
-        .frame1-group {
+        .frame-group {
             margin-left: 20px;
         }
         .submit-group {
             margin-top: 10px;
         }
+
         label {
-            display: block;
             font-weight: bold;
+            margin-top: 5px;
         }
         input {
-            width: 100%;
+            width: 40%;
             padding: 8px;
             margin-top: 4px;
+            margin-left: 4px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
@@ -39,39 +42,20 @@
 </head>
 <body>
 {% block content %}
-<!-- ここにメインコンテンツを書く -->
-    <h2>パラメーターシート作成</h2>
-    <label for="frame1">枠１:</label>
-    <input type="text" name="frame1" placeholder="サーバー情報">
-    <div class="frame1-group">
-        <div class="form-group">
-            <label for="item1">項目:</label>
-            <input type="text" id="item1" name="item1">
-        </div>
-        <div class="form-group">
-            <label for="item2">項目:</label>
-                <input type="text" id="item2" name="item2">
-            </div>
-            <div class="form-group">
-                <label for="item3">項目:</label>
-                <input type="text" id="item3" name="item3">
-            </div>
-            <div class="form-group">
-                <label for="item4">項目:</label>
-                <input type="text" id="item4" name="item4">
-            </div>
-            <div class="form-group">
-                <label for="item5">項目:</label>
-                <input type="text" id="item5" name="item5">
-            </div>
-            <div id="container"></div>
-            <button onclick="addItem()">項目を追加</button>
-            <button onclick="addFrame()">枠を追加</button>
-        </div>
-        <form method="POST">
-        <div class="submit-group">
-        <button type="submit" name="submit_button" value="clicked">作成</button>
+<h2 style="margin-left: 30px;">パラメーターシート作成</h2>
+<div class="frame-group">
+    <div class="form-group">
+        <label for="frame1">枠 1 :</label>
+        <input type="text" id="frame1" name="frame1" placeholder="サーバー情報">
     </div>
+    <div id="container"></div>
+        <button onclick="addItem()">項目を追加</button>
+        <button onclick="addFrame()">枠を追加</button>
+    </div>
+    <form method="POST">
+        <div class="submit-group">
+            <button onclick="confirmAndSubmit()" id="submit_button" name="submit_button" value="clicked">作成</button>
+        </div>
     </form>
     {% if message %}
         <p>{{ message }}</p>
@@ -82,43 +66,70 @@
 
 
 <script>
-    function addItem() {
-        const container = document.getElementById("container");
+    let frame_num = 0
+    let item_num = 0
+    let style_position = 0
 
+    function confirmAndSubmit() {
+        let result = confirm("この内容で送信しますか？");
+        if (result) {
+            document.getElementById("submit_button").submit();
+        } else {
+            alert("送信をキャンセルしました。");
+        }
+    }
+
+    function addItem() {
+        item_num += 1;
+        
+        const container = document.getElementById("container");
+        
         const group = document.createElement("div");
         group.className = "form-group";
+        group.id = `items[${frame_num}][${item_num}]`;
 
         const label = document.createElement("label");
-        label.textContent = "項目:";
-        label.htmlFor = "dynamicInput";
-
+        label.textContent = "項目 :";
+        label.htmlFor = `item[${frame_num}][${item_num}]`;
+        
         const input = document.createElement("input");
         input.type = "text";
-        input.id = "dynamicInput";
-        input.name = "dynamicInput";
-
+        input.id = `item[${frame_num}][${item_num}]`;
+        input.name = `items[${frame_num}][]`;
+        
         group.appendChild(label);
         group.appendChild(input);
         container.appendChild(group);
+
+        const element = document.getElementById(`items[${frame_num}][${item_num}]`);
+        element.style.marginLeft = `${style_position}px`;
     }
 
     function addFrame() {
+        frame_num += 1;
+        item_num = 0;
+        style_position += 30;
+
         const container = document.getElementById("container");
 
         const group = document.createElement("div");
         group.className = "form-group";
+        group.id = `items[${frame_num}][${item_num}]`;
 
         const label = document.createElement("label");
-        label.textContent = "枠:";
-        label.htmlFor = "dynamicInput";
+        label.textContent = `枠 ${frame_num + 1} :`;
+        label.htmlFor = `item[${frame_num}][${item_num}]`;
 
         const input = document.createElement("input");
         input.type = "text";
-        input.id = "dynamicInput";
-        input.name = "dynamicInput";
+        input.id = `item[${frame_num}][${item_num}]`;
+        input.name = `items[${frame_num}][]`;
 
         group.appendChild(label);
         group.appendChild(input);
         container.appendChild(group);
+
+        const element = document.getElementById(`items[${frame_num}][${item_num}]`);
+        element.style.marginLeft = `${style_position}px`;
     }
 </script>
