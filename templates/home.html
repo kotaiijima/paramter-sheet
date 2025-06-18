@@ -11,7 +11,7 @@
             margin-bottom: 10px;
             display: flex;
         }
-        .frame-group {
+        .entire {
             margin-left: 20px;
         }
         .submit-group {
@@ -27,6 +27,7 @@
             padding: 8px;
             margin-top: 4px;
             margin-left: 4px;
+            margin-right: 6px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
@@ -43,20 +44,24 @@
 <body>
 {% block content %}
 <h2 style="margin-left: 30px;">パラメーターシート作成</h2>
-<div class="frame-group">
-    <div class="form-group">
-        <label for="frame1">枠 1 :</label>
-        <input type="text" id="frame1" name="frame1" placeholder="サーバー情報">
-    </div>
-    <div id="container"></div>
-        <button onclick="addItem()">項目を追加</button>
-        <button onclick="addFrame()">枠を追加</button>
-    </div>
-    <form method="POST">
-        <div class="submit-group">
-            <button onclick="confirmAndSubmit()" id="submit_button" name="submit_button" value="clicked">作成</button>
+<form id="to_json">
+    <div class="entire">
+        <div class="title">
+            <label for="title" style="">タイトル :</label>
+            <input type="text" id="title" name="title" placeholder="本体設定">
         </div>
-    </form>
+        <div class="form-group">
+            <label for="item[0][0]" style="margin-right: 3px;">枠 1 :</label>
+            <input type="text" id="item[0][0]" name="items[0][0]" placeholder="サーバー情報">
+        </div>
+        <div id="container"></div>
+            <button type="button" onclick="addItem()">項目を追加</button>
+            <button type="button" onclick="addFrame()">枠を追加</button>
+        </div>
+        <div class="submit-group">
+            <button type="button" onclick="confirmAndSubmit()" id="submit_button" name="submit_button" style="float: right; margin-right: 5%;">作成</button>
+        </div>
+</form>
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
@@ -73,11 +78,53 @@
     function confirmAndSubmit() {
         let result = confirm("この内容で送信しますか？");
         if (result) {
-            document.getElementById("submit_button").submit();
+            sendData();
         } else {
             alert("送信をキャンセルしました。");
         }
     }
+
+async function sendData() {
+    let frame_name = "";
+    let item_name = "";
+
+  const form = document.getElementById("to_json");
+  const data = new FormData(form);
+  // FormDataをJSONに変換
+  const jsonData = {};
+  for (const [key, value] of data.entries()) {
+    if(key.endsWith("[0]")) {
+        frame_name = value;
+        jsonData[frame_name] = [];
+    } else {
+        //項目名、値を識別、入力
+        if(key.startsWith("item")) {
+            item_name = value;
+        } else if(key.startsWith("value")) {
+            jsonData[frame_name].push({ [item_name]: value });
+        } else if(key.startsWith("title")) {
+            jsonData["title"] = value;
+        }
+    }
+  }
+
+  const jsonString = JSON.stringify(jsonData);
+  console.log(jsonString)
+  // POSTリクエストの送信
+  try {
+    const response = await fetch('/receive_json', { // FlaskのAPIエンドポイント
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonString
+    });
+    const result = await response.json(); // レスポンスのJSONを解析
+    console.log(result); 
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
 
     function addItem() {
         item_num += 1;
@@ -88,17 +135,28 @@
         group.className = "form-group";
         group.id = `items[${frame_num}][${item_num}]`;
 
-        const label = document.createElement("label");
-        label.textContent = "項目 :";
-        label.htmlFor = `item[${frame_num}][${item_num}]`;
+        const label1 = document.createElement("label");
+        label1.textContent = "項目 :";
+        label1.htmlFor = `item[${frame_num}][${item_num}]`;
         
-        const input = document.createElement("input");
-        input.type = "text";
-        input.id = `item[${frame_num}][${item_num}]`;
-        input.name = `items[${frame_num}][]`;
+        const input1 = document.createElement("input");
+        input1.type = "text";
+        input1.id = `item[${frame_num}][${item_num}]`;
+        input1.name = `items[${frame_num}][${item_num}]`;
         
-        group.appendChild(label);
-        group.appendChild(input);
+        const label2 = document.createElement("label");
+        label2.textContent = "値 :";
+        label2.htmlFor = `value[${frame_num}][${item_num}]`;
+        
+        const input2 = document.createElement("input");
+        input2.type = "text";
+        input2.id = `value[${frame_num}][${item_num}]`;
+        input2.name = `value[${frame_num}][${item_num}]`;
+       
+        group.appendChild(label1);
+        group.appendChild(input1);
+        group.appendChild(label2);
+        group.appendChild(input2);
         container.appendChild(group);
 
         const element = document.getElementById(`items[${frame_num}][${item_num}]`);
@@ -119,11 +177,12 @@
         const label = document.createElement("label");
         label.textContent = `枠 ${frame_num + 1} :`;
         label.htmlFor = `item[${frame_num}][${item_num}]`;
+        label.style.marginRight = "3px";
 
         const input = document.createElement("input");
         input.type = "text";
         input.id = `item[${frame_num}][${item_num}]`;
-        input.name = `items[${frame_num}][]`;
+        input.name = `items[${frame_num}][${item_num}]`;
 
         group.appendChild(label);
         group.appendChild(input);
