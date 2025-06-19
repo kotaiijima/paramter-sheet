@@ -6,6 +6,7 @@ import datetime
 import logging
 import os
 from tkinter import filedialog
+import tkinter
 
 app1 = Blueprint('receive_json', __name__, template_folder='templates')
 
@@ -29,7 +30,8 @@ def receive_json():
 
     excel_file.remove(excel_file['Sheet'])	
     excel_file.save(excel_file_name)
-
+    #フォントを指定
+    font = Font(name="メイリオ")
     # 書き込むExcelシートを選択
     sheet = excel_file[data["title"]]
     # 余白
@@ -97,48 +99,57 @@ def receive_json():
 
     #各セルに取得した値を入力
     sheet["F2"] = data["title"]
+    sheet["F2"].font = Font(name="メイリオ")
+    #ヘッダーの処理
+    def header_func(frame):
+        nonlocal total_row, col_pos
+        cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos, value=frame)
+        cell.font = Font(bold=True, name="メイリオ")
+        #枠の塗りつぶし
+        for x in range(frame_range):
+            cell = sheet.cell(row=write_row + total_row, column=write_col + x)
+            match col_pos:
+                case 0:
+                    cell.fill = pf_blue1
+                case 1:
+                    if x == 0:
+                        cell.fill = pf_blue1
+                    else:
+                        cell.fill = pf_blue2
+                case _:
+                    if x == 0:
+                        cell.fill = pf_blue1
+                    elif x == 1:
+                        cell.fill = pf_blue2
+                    else:
+                        cell.fill = pf_blue3
+        col_pos += 1
+        total_row += 1
 
     for  frame in list(data.keys()):
         print(frame)
         if frame == "title": continue
-        for index, item in enumerate(data[frame]):
-            for key, value in item.items():
-                if index == 0:
-                    cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos, value=frame)
-                    cell.font = Font(bold=True)
+        print(data[frame])
+        if not data[frame] : header_func(frame=frame) 
+        else:
+            for index, item in enumerate(data[frame]):
+                if index == 0: header_func(frame=frame)
+                for key, value in item.items():
+                    cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos, value=key)
+                    cell.font = Font(name="メイリオ")
+                    cell = sheet.cell(row=write_row + total_row, column=write_col_middle, value=value)
+                    cell.font = Font(name="メイリオ")
                     #枠の塗りつぶし
-                    for x in range(frame_range):
+                    for x in range(col_pos):
                         cell = sheet.cell(row=write_row + total_row, column=write_col + x)
-                        match col_pos:
+                        match x:
                             case 0:
                                 cell.fill = pf_blue1
                             case 1:
-                                if x == 0:
-                                    cell.fill = pf_blue1
-                                else:
-                                    cell.fill = pf_blue2
+                                cell.fill = pf_blue2
                             case _:
-                                if x == 0:
-                                    cell.fill = pf_blue1
-                                elif x == 1:
-                                    cell.fill = pf_blue2
-                                else:
-                                    cell.fill = pf_blue3
-                    col_pos += 1
+                                cell.fill = pf_blue3
                     total_row += 1
-                cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos, value=key)
-                cell = sheet.cell(row=write_row + total_row, column=write_col_middle, value=value)
-                #枠の塗りつぶし
-                for x in range(col_pos):
-                    cell = sheet.cell(row=write_row + total_row, column=write_col + x)
-                    match x:
-                        case 0:
-                            cell.fill = pf_blue1
-                        case 1:
-                            cell.fill = pf_blue2
-                        case _:
-                            cell.fill = pf_blue3
-                total_row += 1
     
     # 枠線を追加
     fill_count = 0
@@ -170,12 +181,18 @@ def receive_json():
             cell.border = left_top_border
 
     # ファイル保存ダイアログを表示（ファイル名も指定可能）
-
+    root = tkinter.Tk()
+    # topmost指定(最前面)
+    root.attributes('-topmost', True)
+    root.withdraw()
+    root.lift()
     filepath = filedialog.asksaveasfilename(
+        parent=root,
         defaultextension=".xlsx",
         filetypes=[("Text files", "*.xlsx"), ("All files", "*.*")],
         title="保存先を指定"
     )
+    root.focus_force()
 
     if filepath:
         excel_file.save(filepath)
