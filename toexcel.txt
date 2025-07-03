@@ -1,7 +1,0 @@
-toexcel
-
-SCSS
-jinja2
-
-後々リアクト
-cssこる
