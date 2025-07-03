@@ -1,19 +1,20 @@
 from flask import Flask, request, render_template, Blueprint, jsonify
 import openpyxl
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font
 import datetime
 import logging
 import os
 from tkinter import filedialog
 import tkinter
+import xlwings 
 
 app1 = Blueprint('receive_json', __name__, template_folder='templates')
 
 #印刷範囲
 print_area = 'A1:AU71'
 # ファイル名のフォーマット修正
-excel_file_name = 'パラメーターシート-%s.xlsx' % "パーキテック"
+excel_file_name = "temp.xlsx"
 
 @app1.route('/receive_json', methods=['POST'])
 def receive_json():
@@ -97,29 +98,45 @@ def receive_json():
     #全体の行数を把握  
     total_row = 0
 
+    #塗りつぶし範囲を把握
+    column_array = []
+    col_pos_minus = 0
+
+    #現在の枠数
+    now_frame = 0
     #各セルに取得した値を入力
     sheet["F2"] = data["title"]
     sheet["F2"].font = Font(name="メイリオ")
+
+    #塗りつぶし範囲の調整    
+    def check_col_pos_minus(y, count) :
+        nonlocal col_pos_minus, now_frame
+        col_pos_minus = 0
+        for i in range(count): 
+            if y >= column_array[i] : col_pos_minus += 1
+        if count == 3: print(f"y = {y}, column_array={column_array[i]}, col_pos_minus:{col_pos_minus}")
     #ヘッダーの処理
     def header_func(frame):
-        nonlocal total_row, col_pos
-        cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos, value=frame)
+        nonlocal total_row, col_pos, col_pos_minus
+        check_col_pos_minus(total_row, col_pos)
+        if col_pos == 3: print(f"total_row:{total_row} pos:{col_pos}, minus:{col_pos_minus} total={col_pos + write_col - col_pos_minus}  name:{frame}")
+        cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos - col_pos_minus, value=frame)
         cell.font = Font(bold=True, name="メイリオ")
         #枠の塗りつぶし
         for x in range(frame_range):
-            cell = sheet.cell(row=write_row + total_row, column=write_col + x)
-            match col_pos:
+            cell = sheet.cell(row=write_row + total_row, column=(write_col + x))
+            match (col_pos - col_pos_minus):
                 case 0:
                     cell.fill = pf_blue1
                 case 1:
-                    if x == 0:
+                    if (x) == 0:
                         cell.fill = pf_blue1
                     else:
                         cell.fill = pf_blue2
                 case _:
-                    if x == 0:
+                    if (x) == 0:
                         cell.fill = pf_blue1
-                    elif x == 1:
+                    elif (x) == 1:
                         cell.fill = pf_blue2
                     else:
                         cell.fill = pf_blue3
@@ -133,16 +150,21 @@ def receive_json():
         if not data[frame] : header_func(frame=frame) 
         else:
             for index, item in enumerate(data[frame]):
-                if index == 0: header_func(frame=frame)
+                if index == 0: 
+                    column_array.append(int(item["column"]) + total_row)
+                    header_func(frame=frame)
                 for key, value in item.items():
-                    cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos, value=key)
+                    if key == "column": continue
+                    check_col_pos_minus(total_row, col_pos)
+                    cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos - col_pos_minus, value=key)
                     cell.font = Font(name="メイリオ")
                     cell = sheet.cell(row=write_row + total_row, column=write_col_middle, value=value)
                     cell.font = Font(name="メイリオ")
                     #枠の塗りつぶし
-                    for x in range(col_pos):
+                    for x in range(col_pos - col_pos_minus):
+                        #if (write_col + x - col_pos_minus) < 6 : continue
                         cell = sheet.cell(row=write_row + total_row, column=write_col + x)
-                        match x:
+                        match (x):
                             case 0:
                                 cell.fill = pf_blue1
                             case 1:
@@ -161,12 +183,14 @@ def receive_json():
             and cell.fill.fgColor.rgb not in (None, "00000000")
         )
 
+        check_col_pos_minus(y, fill_count)
+        #print(f"y={y}, fillcount={fill_count}, col_pos_minus={col_pos_minus}")
         for x in range(frame_range):
             cell = sheet.cell(row=write_row + y, column=write_col + x)
             if y != total_row:
-                if (x - fill_count) < 0:
+                if (x - (fill_count - col_pos_minus)) < 0:
                     cell.border = left_border
-                elif (x - fill_count) == 0:
+                elif (x - (fill_count - col_pos_minus)) == 0:
                     cell.border = left_top_border
                 elif x == (frame_range - 1):
                     cell.border = right_top_border
@@ -179,6 +203,7 @@ def receive_json():
         elif y != total_row:
             cell = sheet.cell(row=write_row + y, column=write_col_middle)
             cell.border = left_top_border
+    excel_file.save(excel_file_name)
 
     # ファイル保存ダイアログを表示（ファイル名も指定可能）
     root = tkinter.Tk()
@@ -195,8 +220,17 @@ def receive_json():
     root.focus_force()
 
     if filepath:
-        excel_file.save(filepath)
-        message = print(f"ファイルを保存しました: {filepath}")
+        if os.path.exists(filepath):
+            with xlwings.App(visible=False) as app:
+                src_wb = xlwings.Book(r'temp.xlsx')
+                dst_wb = xlwings.Book(filepath)
+                src_wb.sheets[0].copy(after=dst_wb.sheets[0])
+                dst_wb.save()
+                src_wb.close()
+                dst_wb.close()
+        else:
+            excel_file.save(filepath)
+            message = print(f"ファイルを保存しました: {filepath}")
     else:
         return "", 204
     
