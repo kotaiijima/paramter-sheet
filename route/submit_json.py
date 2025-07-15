@@ -7,6 +7,11 @@ app2 = Blueprint('submit_json', __name__, template_folder='templates')
 
 @app2.route('/submit_json', methods=['GET'])
 def submit_json():
+
+    print(request.args.get('template'))
+    if request.args.get('template') is not None:
+        data = {}
+        return render_template("home.html", data=data)
     # ファイル保存ダイアログを表示（ファイル名も指定可能）
     root = tkinter.Tk()
     # topmost指定(最前面)

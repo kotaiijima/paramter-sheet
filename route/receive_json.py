@@ -1,9 +1,6 @@
 from flask import Flask, request, render_template, Blueprint, jsonify
 import openpyxl
-from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Font
-import datetime
-import logging
 import os
 from tkinter import filedialog
 import tkinter
@@ -151,10 +148,10 @@ def receive_json():
         else:
             for index, item in enumerate(data[frame]):
                 if index == 0: 
-                    column_array.append(int(item["column"]) + total_row)
+                    column_array.append(int(item["row"]) + total_row)
                     header_func(frame=frame)
                 for key, value in item.items():
-                    if key == "column": continue
+                    if key == "row": continue
                     check_col_pos_minus(total_row, col_pos)
                     cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos - col_pos_minus, value=key)
                     cell.font = Font(name="メイリオ")
@@ -224,7 +221,7 @@ def receive_json():
             with xlwings.App(visible=False) as app:
                 src_wb = xlwings.Book(r'temp.xlsx')
                 dst_wb = xlwings.Book(filepath)
-                src_wb.sheets[0].copy(after=dst_wb.sheets[0])
+                src_wb.sheets[0].copy(after=dst_wb.sheets[-1])
                 dst_wb.save()
                 src_wb.close()
                 dst_wb.close()
