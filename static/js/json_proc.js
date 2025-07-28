@@ -4,6 +4,13 @@ window.onload = async function() {
     false_button();
     await showJsonlist();
 
+    const json_data_str = sessionStorage.getItem("json_data");
+    console.log(json_data_str);
+    if (json_data_str) {
+        json_data = JSON.parse(json_data_str);
+    }
+    // 一度使ったら削除（不要なら残してもOK）
+    sessionStorage.removeItem("json_data");
 
     if (Object.keys(json_data).length) {
         uploadJson();
@@ -63,7 +70,6 @@ function confirmAndSubmit() {
 function uploadJson() {
     let first_frame_check = false;
     const slider_row = new Map;
-    console.log(json_data);
     for (const frame_key in json_data) {
         if (frame_key == "title") {
             document.getElementById("title").value = json_data[frame_key];
@@ -198,8 +204,8 @@ async function click_import_button() {
             select = document.getElementById("template");
             select.innerHTML = "";
             showJsonlist();
-            json_data = result.data;
-            uploadJson();
+            sessionStorage.setItem("json_data", JSON.stringify(result.data));
+            location.href = location.origin + location.pathname;
         };
     } catch (error) {
         console.error('Error:', error);
