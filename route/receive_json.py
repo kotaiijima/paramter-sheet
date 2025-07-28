@@ -148,10 +148,10 @@ def receive_json():
         else:
             for index, item in enumerate(data[frame]):
                 if index == 0: 
-                    column_array.append(int(item["row"]) + total_row)
+                    column_array.append(int(item["column"]) + total_row)
                     header_func(frame=frame)
                 for key, value in item.items():
-                    if key == "row": continue
+                    if key == "column": continue
                     check_col_pos_minus(total_row, col_pos)
                     cell = sheet.cell(row=write_row + total_row, column=write_col + col_pos - col_pos_minus, value=key)
                     cell.font = Font(name="メイリオ")

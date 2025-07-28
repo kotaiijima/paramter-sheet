@@ -68,9 +68,11 @@ function addItem() {
 
     for (let i = 0; i <= frame_num; i++) {
         const slider_item = document.getElementById(`slider_item${i}`);
-        slider_item.max = Number(slider_item.max) + 1;
-        const current_slider = document.getElementById(`sliderGroup${i}`).offsetHeight;
-        slider_item.style.height = current_slider + "px";
+        if (slider_item) {
+            slider_item.max = Number(slider_item.max) + 1;
+            const current_slider = document.getElementById(`sliderGroup${i}`).offsetHeight;
+            slider_item.style.height = current_slider + "px";
+        }
     };
 }
 
@@ -155,9 +157,11 @@ function addFrame() {
 
     for (let i = 0; i < frame_num; i++) {
         const slider_item = document.getElementById(`slider_item${i}`);
-        slider_item.max = Number(slider_item.max) + 1;
-        const current_slider = document.getElementById(`sliderGroup${i}`).offsetHeight;
-        slider_item.style.height = current_slider + "px";
+        if (slider_item) {
+            slider_item.max = Number(slider_item.max) + 1;
+            const current_slider = document.getElementById(`sliderGroup${i}`).offsetHeight;
+            slider_item.style.height = current_slider + "px";
+        }
     };
 }
 

@@ -1,5 +1,7 @@
 window.onload = async function() {
     select = document.getElementById("template");
+    //ボタンの状態を初期化
+    false_button();
     await showJsonlist();
 
 
@@ -61,6 +63,7 @@ function confirmAndSubmit() {
 function uploadJson() {
     let first_frame_check = false;
     const slider_row = new Map;
+    console.log(json_data);
     for (const frame_key in json_data) {
         if (frame_key == "title") {
             document.getElementById("title").value = json_data[frame_key];
@@ -70,7 +73,7 @@ function uploadJson() {
             document.getElementById(`item[${frame_num}][0]`).value = frame_key;
             for (const item of json_data[frame_key]) {
                 for (const [key, value] of Object.entries(item)) {
-                    if (key != "row") {
+                    if (key != "column") {
                         addItem();
                         //console.log(key, value);
                         document.getElementById(`item[${frame_num}][${item_num}]`).value = key;
@@ -106,7 +109,7 @@ function convertJson() {
             jsonData[frame_name] = [];
             const current_frame_num = Number(key.charAt(key.length - 5));
             const slider_cnt = document.getElementById(`slider_item${current_frame_num}`).value;
-            jsonData[frame_name].push({ ["row"]: slider_cnt });
+            jsonData[frame_name].push({ ["column"]: slider_cnt });
         } else {
             //項目名、値を識別、入力
             if(key.startsWith("item")) {
@@ -148,6 +151,8 @@ function selectedTemplate() {
     }
 
 async function saveTemplate() {
+    //ボタンを押せない状態にする
+    true_button();
     jsonString = convertJson();
     // POSTリクエストの送信
     try {
@@ -171,4 +176,37 @@ async function saveTemplate() {
     } catch (error) {
         console.error('Error:', error);
     }
+    //ボタンの状態を初期化
+    false_button();
+}
+
+async function click_import_button() {
+    true_button();
+    // POSTリクエストの送信
+    try {
+        const response = await fetch('/submit_json', { // FlaskのAPIエンドポイント
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+        });
+        const result = await response.json(); // レスポンスのJSONを解析
+        console.log(result); 
+        if (result.status === "cancel") {
+            alert("キャンセルしました。");
+        } else {
+            select = document.getElementById("template");
+            select.innerHTML = "";
+            showJsonlist();
+            json_data = result.data;
+            uploadJson();
+        };
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    //ボタンの状態を初期化
+    false_button();
+
+    // return false でデフォルトの送信を防ぐ（安全策）
+    return false;
 }

@@ -5,7 +5,7 @@ import json
 
 app2 = Blueprint('submit_json', __name__, template_folder='templates')
 
-@app2.route('/submit_json', methods=['GET'])
+@app2.route('/submit_json', methods=['POST', 'GET'])
 def submit_json():
 
     print(request.args.get('template'))
@@ -29,11 +29,12 @@ def submit_json():
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
     else:
-        return render_template("home.html", data={}, message="アップロードをキャンセルしました。")
-    
+        return jsonify({"status": "cancel", "data": {}})  # レスポンスを返す
+
     print("Received JSON:", data)  # コンソールに出力
 
-    return render_template("home.html", data=data)
+    #return render_template("home.html", data=data)
+    return jsonify({"status": "ok", "data": data})  # レスポンスを返す
 
 if __name__ == '__main__':
     app2.run(debug=True)

@@ -1,12 +1,4 @@
 from flask import Flask, request, render_template, Blueprint, jsonify
-import json
-import os
-import tkinter
-from tkinter import simpledialog
-import pyautogui
-import time
-import threading
-import pygetwindow
 from pathlib import Path
 
 app4 = Blueprint('get_json_list', __name__, template_folder='templates')

@@ -91,10 +91,8 @@
   </div>
     <button type="button" onclick="addItem()">項目を追加</button>
     <button type="button" onclick="addFrame()">枠を追加</button>
-    <button type="button" onclick="saveTemplate()">テンプレートを保存</button>
-    <form action="/submit_json" method="GET" id="form_sub">
-    <button type="submit">テンプレートを取り込む</button>
-    </form>
+    <button type="button" onclick="saveTemplate()" class="control_button">テンプレートを保存</button>
+    <button type="submit" class="control_button" onclick="click_import_button()">テンプレートを取り込む</button>
 </div>
 
 <form id="to_json">
@@ -117,7 +115,7 @@
         </div>
     </div>
         <div class="submit-group">
-            <button type="button" onclick="confirmAndSubmit()" id="submit_button" name="submit_button" style="float: right; margin-right: 5%;">作成</button>
+            <button type="button" onclick="confirmAndSubmit()" id="submit_button" name="submit_button" style="float: right; margin-right: 5%;" class="control_button">作成</button>
         </div>
 </form>
 
